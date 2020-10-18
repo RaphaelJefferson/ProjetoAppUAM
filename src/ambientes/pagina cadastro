@@ -1,0 +1,59 @@
+{
+  "name": "fakemytemplate",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo "Error: no test specified" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "faker": "^3.1.0"
+  }
+  <% include ../header.ejs %>
+
+  <form action='/usuario/login/processa' method='POST'>
+        <input type='text' name='login' placeholder='login' />
+        <input type='password' name='senha' placeholder='senha' />
+     
+
+        <a href='/usuario/cadastro'>Criar nova conta</a>
+
+        <input type='submit' value='Entrar' />
+  </form>
+
+  <% include ../footer.ejs %>
+}
+
+{
+    cadastro: function(req, res){
+              res.render("usuario/cadastro");
+            },
+
+            cadastroAction: function(req, res){
+
+              req.assert(['usuario', 'nome'], 'Insira seu nome completo').notEmpty();
+              req.assert(['usuario', 'nickname'], 'Insira um apelido').notEmpty();
+              req.assert(['usuario', 'email'], 'Insira uma conta de e-mail válida').len(10, 50).isEmail();
+              req.assert(['usuario', 'senha'], 'Insira uma senha de no mínimo 6 caracteres').len(6, 20);
+              req.assert(['usuario', 'conf_senha'], 'Confira sua senha').len(6,20);
+              req.assert(['usuario', 'conf_senha'], 'As senhas não são compatíveis').equals(req.body.usuario.senha);
+
+              var errors = req.validationErrors();
+
+              if(errors){
+                    res.render("usuario/cadastro", {'errors': errors});
+              }else{
+                    var usuarioModel = app.models.usuario;
+                    usuarioModel.create(req.body.usuario, function(error, usuario){
+                          if(error){
+                                res.render("usuario/cadastro", {'errors': [{'msg': error.err}]});
+                          }else{
+                                res.redirect("/usuario/login");
+                          }
+                    });
+              }
+        }
+}
+
